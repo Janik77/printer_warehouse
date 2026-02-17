@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+    <h2>Warehouses</h2>
+    <a href="{% url 'ui:warehouse_create' %}" class="btn btn-success">Add warehouse</a>
+</div>
+<table class="table table-bordered">
+    <thead><tr><th>Name</th><th>City</th><th>Address</th><th>Active</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for warehouse in object_list %}
+        <tr>
+            <td>{{ warehouse.name }}</td><td>{{ warehouse.city }}</td><td>{{ warehouse.address }}</td><td>{{ warehouse.is_active }}</td>
+            <td>
+                <a href="{% url 'ui:warehouse_update' warehouse.pk %}" class="btn btn-sm btn-primary">Edit</a>
+                <a href="{% url 'ui:warehouse_delete' warehouse.pk %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="5">No warehouses.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

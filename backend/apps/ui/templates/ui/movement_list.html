@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+    <h2>Movements</h2>
+    <a href="{% url 'ui:movement_create' %}" class="btn btn-success">Create movement</a>
+</div>
+<table class="table table-bordered">
+    <thead><tr><th>Date</th><th>Type</th><th>Printer</th><th>From</th><th>To</th><th>Qty</th><th>Note</th></tr></thead>
+    <tbody>
+    {% for mv in object_list %}
+        <tr>
+            <td>{{ mv.created_at }}</td><td>{{ mv.movement_type }}</td><td>{{ mv.printer }}</td><td>{{ mv.warehouse_from|default:'-' }}</td><td>{{ mv.warehouse_to|default:'-' }}</td><td>{{ mv.qty }}</td><td>{{ mv.note }}</td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="7">No movements.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

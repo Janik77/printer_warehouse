@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+    <h2>Printers</h2>
+    <a href="{% url 'ui:printer_create' %}" class="btn btn-success">Add printer</a>
+</div>
+<form method="get" class="row g-3 mb-3">
+    <div class="col-md-4">{{ filter_form.serial_number.label_tag }} {{ filter_form.serial_number }}</div>
+    <div class="col-md-4">{{ filter_form.status.label_tag }} {{ filter_form.status }}</div>
+    <div class="col-md-4">{{ filter_form.warehouse.label_tag }} {{ filter_form.warehouse }}</div>
+    <div><button type="submit" class="btn btn-outline-primary">Filter</button></div>
+</form>
+<table class="table table-bordered">
+    <thead><tr><th>SN</th><th>Name</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for printer in object_list %}
+        <tr>
+            <td>{{ printer.serial_number }}</td><td>{{ printer.name }}</td><td>{{ printer.status }}</td>
+            <td>
+                <a href="{% url 'ui:printer_update' printer.pk %}" class="btn btn-sm btn-primary">Edit</a>
+                <a href="{% url 'ui:printer_delete' printer.pk %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="4">No printers.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
