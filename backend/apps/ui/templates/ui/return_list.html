@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Возвраты{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h4 mb-0">Возвраты</h2>
+            <a href="{% url 'ui:return_create' %}" class="btn btn-success">Создать возврат</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-sm align-middle">
+                <thead class="bg-light"><tr><th>ID</th><th>Дата</th><th>Клиент</th><th>Склад</th><th>Причина</th></tr></thead>
+                <tbody>
+                {% for ret in object_list %}
+                    <tr>
+                        <td>{{ ret.id }}</td>
+                        <td>{{ ret.return_date|date:'d.m.Y' }}</td>
+                        <td>{{ ret.customer }}</td>
+                        <td>{{ ret.warehouse }}</td>
+                        <td>{{ ret.reason|default:'—' }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="5" class="text-muted">Возвраты отсутствуют.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
