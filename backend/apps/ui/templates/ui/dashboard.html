@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Dashboard</h1>
+
+<h3>Stock Balance by Warehouse</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Warehouse</th>
+            <th>Printer</th>
+            <th>Qty</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for balance in balances %}
+            <tr>
+                <td>{{ balance.warehouse }}</td>
+                <td>{{ balance.printer }}</td>
+                <td>{{ balance.qty }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="3">No balances available.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3>Last 20 Movements</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Printer</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Qty</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for movement in movements %}
+            <tr>
+                <td>{{ movement.created_at }}</td>
+                <td>{{ movement.movement_type }}</td>
+                <td>{{ movement.printer }}</td>
+                <td>{{ movement.warehouse_from|default:'-' }}</td>
+                <td>{{ movement.warehouse_to|default:'-' }}</td>
+                <td>{{ movement.qty }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6">No movements available.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="row">
+    <div class="col-md-6">
+        <h3>Last 10 Sales</h3>
+        <ul class="list-group">
+            {% for sale in sales %}
+                <li class="list-group-item">#{{ sale.id }} — {{ sale.customer }} — {{ sale.total }}</li>
+            {% empty %}
+                <li class="list-group-item">No sales.</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col-md-6">
+        <h3>Last 10 Returns</h3>
+        <ul class="list-group">
+            {% for ret in returns %}
+                <li class="list-group-item">#{{ ret.id }} — {{ ret.customer }} — {{ ret.return_date }}</li>
+            {% empty %}
+                <li class="list-group-item">No returns.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

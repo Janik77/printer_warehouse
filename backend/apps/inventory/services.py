@@ -1,46 +1,46 @@
 from django.db import transaction
-from django.db.models import F
+from django.db.models import Sum
 
-from .models import StockBalance, StockMovement, Printer
+from .models import Printer, StockBalance, StockMovement
 
 
 @transaction.atomic
 def apply_movement(mv: StockMovement) -> None:
     """
-    Применяет движение к остаткам.
-    Важное правило: остатки меняем ТОЛЬКО через движения.
+    Apply stock movement to balances.
+    Rule: balances are changed only through movements.
     """
     qty = mv.qty
 
-    # IN / RETURN -> добавляем на warehouse_to
     if mv.movement_type in [StockMovement.Type.IN, StockMovement.Type.RETURN]:
         if not mv.warehouse_to:
             raise ValueError("warehouse_to is required for IN/RETURN")
 
         bal, _ = StockBalance.objects.get_or_create(warehouse=mv.warehouse_to, printer=mv.printer)
-        StockBalance.objects.filter(pk=bal.pk).update(qty=F("qty") + qty)
+        bal.qty += qty
+        bal.save(update_fields=["qty"])
 
-    # OUT -> списываем с warehouse_from
     elif mv.movement_type == StockMovement.Type.OUT:
         if not mv.warehouse_from:
             raise ValueError("warehouse_from is required for OUT")
 
         bal, _ = StockBalance.objects.get_or_create(warehouse=mv.warehouse_from, printer=mv.printer)
-        StockBalance.objects.filter(pk=bal.pk).update(qty=F("qty") - qty)
+        bal.qty -= qty
+        bal.save(update_fields=["qty"])
 
-    # TRANSFER -> минус со склада A, плюс на склад B
     elif mv.movement_type == StockMovement.Type.TRANSFER:
         if not mv.warehouse_from or not mv.warehouse_to:
             raise ValueError("warehouse_from and warehouse_to are required for TRANSFER")
 
         bal_from, _ = StockBalance.objects.get_or_create(warehouse=mv.warehouse_from, printer=mv.printer)
         bal_to, _ = StockBalance.objects.get_or_create(warehouse=mv.warehouse_to, printer=mv.printer)
-        StockBalance.objects.filter(pk=bal_from.pk).update(qty=F("qty") - qty)
-        StockBalance.objects.filter(pk=bal_to.pk).update(qty=F("qty") + qty)
-
-    # ADJUST -> пока не внедряем сложную логику, можно позже
+        bal_from.qty -= qty
+        bal_from.save(update_fields=["qty"])
+        bal_to.qty += qty
+        bal_to.save(update_fields=["qty"])
     else:
         raise ValueError("Unsupported movement type")
 
-    # Обновляем статус принтера грубо: если везде 0 — значит не на складе
-    total_qty = StockBalance.objects.filter(printer=mv.printer).aggregate(models_sum=F("qty"))
+    total_qty = StockBalance.objects.filter(printer=mv.printer).aggregate(total=Sum("qty"))["total"] or 0
+    mv.printer.status = Printer.Status.IN_STOCK if total_qty > 0 else Printer.Status.SOLD
+    mv.printer.save(update_fields=["status"])

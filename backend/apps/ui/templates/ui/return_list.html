@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+    <h2>Returns</h2>
+    <a href="{% url 'ui:return_create' %}" class="btn btn-success">Create return</a>
+</div>
+<table class="table table-bordered">
+    <thead><tr><th>ID</th><th>Date</th><th>Customer</th><th>Warehouse</th><th>Reason</th></tr></thead>
+    <tbody>
+    {% for ret in object_list %}
+        <tr>
+            <td>{{ ret.id }}</td><td>{{ ret.return_date }}</td><td>{{ ret.customer }}</td><td>{{ ret.warehouse }}</td><td>{{ ret.reason }}</td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="5">No returns.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
