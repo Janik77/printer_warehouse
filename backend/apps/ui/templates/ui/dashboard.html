@@ -1,78 +1,103 @@
 {% extends 'base.html' %}
 
+{% block title %}Панель управления{% endblock %}
+
 {% block content %}
-<h1>Dashboard</h1>
+<h1 class="h3 mb-3">Панель управления</h1>
 
-<h3>Stock Balance by Warehouse</h3>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Warehouse</th>
-            <th>Printer</th>
-            <th>Qty</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for balance in balances %}
-            <tr>
-                <td>{{ balance.warehouse }}</td>
-                <td>{{ balance.printer }}</td>
-                <td>{{ balance.qty }}</td>
-            </tr>
-        {% empty %}
-            <tr><td colspan="3">No balances available.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<h3>Last 20 Movements</h3>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Type</th>
-            <th>Printer</th>
-            <th>From</th>
-            <th>To</th>
-            <th>Qty</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for movement in movements %}
-            <tr>
-                <td>{{ movement.created_at }}</td>
-                <td>{{ movement.movement_type }}</td>
-                <td>{{ movement.printer }}</td>
-                <td>{{ movement.warehouse_from|default:'-' }}</td>
-                <td>{{ movement.warehouse_to|default:'-' }}</td>
-                <td>{{ movement.qty }}</td>
-            </tr>
-        {% empty %}
-            <tr><td colspan="6">No movements available.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<div class="row">
-    <div class="col-md-6">
-        <h3>Last 10 Sales</h3>
-        <ul class="list-group">
-            {% for sale in sales %}
-                <li class="list-group-item">#{{ sale.id }} — {{ sale.customer }} — {{ sale.total }}</li>
-            {% empty %}
-                <li class="list-group-item">No sales.</li>
-            {% endfor %}
-        </ul>
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h3 class="h5">Остатки по складам</h3>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-sm align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th>Склад</th>
+                        <th>Принтер</th>
+                        <th>Количество</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for balance in balances %}
+                        <tr>
+                            <td>{{ balance.warehouse }}</td>
+                            <td>{{ balance.printer }}</td>
+                            <td>{{ balance.qty }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="3" class="text-muted">Нет данных по остаткам.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="col-md-6">
-        <h3>Last 10 Returns</h3>
-        <ul class="list-group">
-            {% for ret in returns %}
-                <li class="list-group-item">#{{ ret.id }} — {{ ret.customer }} — {{ ret.return_date }}</li>
-            {% empty %}
-                <li class="list-group-item">No returns.</li>
-            {% endfor %}
-        </ul>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h3 class="h5">Последние 20 перемещений</h3>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-sm align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th>Дата</th>
+                        <th>Тип</th>
+                        <th>Принтер</th>
+                        <th>Со склада</th>
+                        <th>На склад</th>
+                        <th>Кол-во</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movement in movements %}
+                        <tr>
+                            <td>{{ movement.created_at|date:'d.m.Y H:i' }}</td>
+                            <td>{{ movement.get_movement_type_display }}</td>
+                            <td>{{ movement.printer }}</td>
+                            <td>{{ movement.warehouse_from|default:'—' }}</td>
+                            <td>{{ movement.warehouse_to|default:'—' }}</td>
+                            <td>{{ movement.qty }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="6" class="text-muted">Нет перемещений.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h3 class="h5">Последние 10 продаж</h3>
+                <ul class="list-group list-group-flush">
+                    {% for sale in sales %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>№{{ sale.id }} — {{ sale.customer }}</span>
+                            <strong>{{ sale.total }}</strong>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">Нет продаж.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h3 class="h5">Последние 10 возвратов</h3>
+                <ul class="list-group list-group-flush">
+                    {% for ret in returns %}
+                        <li class="list-group-item">№{{ ret.id }} — {{ ret.customer }} — {{ ret.return_date|date:'d.m.Y' }}</li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">Нет возвратов.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

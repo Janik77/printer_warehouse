@@ -14,7 +14,7 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-## Web UI (Django Templates)
+## Web UI (Django Templates, русский интерфейс)
 
 UI доступен только для авторизованных пользователей.
 

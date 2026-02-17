@@ -41,6 +41,7 @@ def dashboard(request):
             "movements": movements,
             "sales": sales,
             "returns": returns,
+            "page_title": "Панель управления",
         },
     )
 
@@ -55,9 +56,10 @@ class WarehouseCreateView(LoginRequiredMixin, CreateView):
     form_class = WarehouseForm
     template_name = "ui/form.html"
     success_url = reverse_lazy("ui:warehouse_list")
+    extra_context = {"page_title": "Создать склад", "submit_label": "Сохранить"}
 
     def form_valid(self, form):
-        messages.success(self.request, "Warehouse created successfully.")
+        messages.success(self.request, "Склад успешно создан.")
         return super().form_valid(form)
 
 
@@ -66,9 +68,10 @@ class WarehouseUpdateView(LoginRequiredMixin, UpdateView):
     form_class = WarehouseForm
     template_name = "ui/form.html"
     success_url = reverse_lazy("ui:warehouse_list")
+    extra_context = {"page_title": "Редактировать склад", "submit_label": "Сохранить"}
 
     def form_valid(self, form):
-        messages.success(self.request, "Warehouse updated successfully.")
+        messages.success(self.request, "Склад успешно обновлён.")
         return super().form_valid(form)
 
 
@@ -76,9 +79,10 @@ class WarehouseDeleteView(LoginRequiredMixin, DeleteView):
     model = Warehouse
     template_name = "ui/confirm_delete.html"
     success_url = reverse_lazy("ui:warehouse_list")
+    extra_context = {"page_title": "Удаление склада"}
 
     def form_valid(self, form):
-        messages.success(self.request, "Warehouse deleted successfully.")
+        messages.success(self.request, "Склад успешно удалён.")
         return super().form_valid(form)
 
 
@@ -115,9 +119,10 @@ class PrinterCreateView(LoginRequiredMixin, CreateView):
     form_class = PrinterForm
     template_name = "ui/form.html"
     success_url = reverse_lazy("ui:printer_list")
+    extra_context = {"page_title": "Создать принтер", "submit_label": "Сохранить"}
 
     def form_valid(self, form):
-        messages.success(self.request, "Printer created successfully.")
+        messages.success(self.request, "Принтер успешно создан.")
         return super().form_valid(form)
 
 
@@ -126,9 +131,10 @@ class PrinterUpdateView(LoginRequiredMixin, UpdateView):
     form_class = PrinterForm
     template_name = "ui/form.html"
     success_url = reverse_lazy("ui:printer_list")
+    extra_context = {"page_title": "Редактировать принтер", "submit_label": "Сохранить"}
 
     def form_valid(self, form):
-        messages.success(self.request, "Printer updated successfully.")
+        messages.success(self.request, "Принтер успешно обновлён.")
         return super().form_valid(form)
 
 
@@ -136,9 +142,10 @@ class PrinterDeleteView(LoginRequiredMixin, DeleteView):
     model = Printer
     template_name = "ui/confirm_delete.html"
     success_url = reverse_lazy("ui:printer_list")
+    extra_context = {"page_title": "Удаление принтера"}
 
     def form_valid(self, form):
-        messages.success(self.request, "Printer deleted successfully.")
+        messages.success(self.request, "Принтер успешно удалён.")
         return super().form_valid(form)
 
 
@@ -152,6 +159,7 @@ class MovementCreateView(LoginRequiredMixin, CreateView):
     form_class = StockMovementForm
     template_name = "ui/form.html"
     success_url = reverse_lazy("ui:movement_list")
+    extra_context = {"page_title": "Создать перемещение", "submit_label": "Сохранить"}
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
@@ -165,7 +173,7 @@ class MovementCreateView(LoginRequiredMixin, CreateView):
             messages.error(self.request, str(exc))
             return self.form_invalid(form)
 
-        messages.success(self.request, "Movement created and applied successfully.")
+        messages.success(self.request, "Перемещение успешно создано и применено.")
         return redirect(self.success_url)
 
 
@@ -182,7 +190,7 @@ def sale_create(request):
         if form.is_valid() and formset.is_valid():
             items = [f.cleaned_data for f in formset if f.cleaned_data.get("printer")]
             if not items:
-                messages.error(request, "Please add at least one sale item.")
+                messages.error(request, "Добавьте хотя бы одну позицию продажи.")
             else:
                 try:
                     sale = create_sale_with_items(
@@ -193,15 +201,19 @@ def sale_create(request):
                 except ValueError as exc:
                     messages.error(request, str(exc))
                 else:
-                    messages.success(request, f"Sale #{sale.id} created successfully.")
+                    messages.success(request, f"Продажа №{sale.id} успешно создана.")
                     return redirect("ui:sale_list")
         else:
-            messages.error(request, "Please correct the errors below.")
+            messages.error(request, "Исправьте ошибки в форме.")
     else:
         form = SaleForm()
         formset = SaleItemFormSet(prefix="items")
 
-    return render(request, "ui/sale_form.html", {"form": form, "formset": formset})
+    return render(
+        request,
+        "ui/sale_form.html",
+        {"form": form, "formset": formset, "page_title": "Создать продажу", "submit_label": "Сохранить"},
+    )
 
 
 class ReturnListView(LoginRequiredMixin, ListView):
@@ -217,7 +229,7 @@ def return_create(request):
         if form.is_valid() and formset.is_valid():
             items = [f.cleaned_data for f in formset if f.cleaned_data.get("printer")]
             if not items:
-                messages.error(request, "Please add at least one return item.")
+                messages.error(request, "Добавьте хотя бы одну позицию возврата.")
             else:
                 try:
                     ret = create_return_with_items(
@@ -228,12 +240,16 @@ def return_create(request):
                 except ValueError as exc:
                     messages.error(request, str(exc))
                 else:
-                    messages.success(request, f"Return #{ret.id} created successfully.")
+                    messages.success(request, f"Возврат №{ret.id} успешно создан.")
                     return redirect("ui:return_list")
         else:
-            messages.error(request, "Please correct the errors below.")
+            messages.error(request, "Исправьте ошибки в форме.")
     else:
         form = ReturnForm()
         formset = ReturnItemFormSet(prefix="items")
 
-    return render(request, "ui/return_form.html", {"form": form, "formset": formset})
+    return render(
+        request,
+        "ui/return_form.html",
+        {"form": form, "formset": formset, "page_title": "Создать возврат", "submit_label": "Сохранить"},
+    )
